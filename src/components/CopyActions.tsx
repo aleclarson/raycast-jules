@@ -2,7 +2,13 @@ import { Action, Icon, Keyboard } from "@raycast/api";
 import { Plan } from "../types";
 import { formatPlanToMarkdown } from "../utils";
 
-export function CopyUrlAction({ url, title = "Copy URL" }: { url: string; title?: string }) {
+export function CopyUrlAction({
+  url,
+  title = "Copy URL",
+}: {
+  url: string;
+  title?: string;
+}) {
   return (
     <Action.CopyToClipboard
       title={title}
@@ -13,7 +19,13 @@ export function CopyUrlAction({ url, title = "Copy URL" }: { url: string; title?
   );
 }
 
-export function CopyIdAction({ id, title = "Copy ID" }: { id: string; title?: string }) {
+export function CopyIdAction({
+  id,
+  title = "Copy ID",
+}: {
+  id: string;
+  title?: string;
+}) {
   return (
     <Action.CopyToClipboard
       title={title}
@@ -46,7 +58,13 @@ export function CopyPrUrlAction({ url }: { url: string }) {
   );
 }
 
-export function CopyPlanMarkdownAction({ plan, title = "Copy Plan as Markdown" }: { plan: Plan; title?: string }) {
+export function CopyPlanMarkdownAction({
+  plan,
+  title = "Copy Plan as Markdown",
+}: {
+  plan: Plan;
+  title?: string;
+}) {
   return (
     <Action.CopyToClipboard
       title={title}

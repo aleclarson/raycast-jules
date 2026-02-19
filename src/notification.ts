@@ -6,18 +6,28 @@ import { Session, SessionState } from "./types";
 /**
  * Get sessions that have completed but haven't been seen by the user yet
  */
-export function getNewCompletedSessions(sessions: Session[], lastSeenCompletedSessions: string[]): Session[] {
+export function getNewCompletedSessions(
+  sessions: Session[],
+  lastSeenCompletedSessions: string[],
+): Session[] {
   return sessions.filter(
-    (session) => session.state === SessionState.COMPLETED && !lastSeenCompletedSessions.includes(session.id),
+    (session) =>
+      session.state === SessionState.COMPLETED &&
+      !lastSeenCompletedSessions.includes(session.id),
   );
 }
 
 /**
  * Get sessions that have failed but haven't been seen by the user yet
  */
-export function getNewFailedSessions(sessions: Session[], lastSeenFailedSessions: string[]): Session[] {
+export function getNewFailedSessions(
+  sessions: Session[],
+  lastSeenFailedSessions: string[],
+): Session[] {
   return sessions.filter(
-    (session) => session.state === SessionState.FAILED && !lastSeenFailedSessions.includes(session.id),
+    (session) =>
+      session.state === SessionState.FAILED &&
+      !lastSeenFailedSessions.includes(session.id),
   );
 }
 
@@ -27,7 +37,8 @@ export function getNewFailedSessions(sessions: Session[], lastSeenFailedSessions
 export function getAttentionSessions(sessions: Session[]): Session[] {
   return sessions.filter(
     (session) =>
-      session.state === SessionState.AWAITING_PLAN_APPROVAL || session.state === SessionState.AWAITING_USER_FEEDBACK,
+      session.state === SessionState.AWAITING_PLAN_APPROVAL ||
+      session.state === SessionState.AWAITING_USER_FEEDBACK,
   );
 }
 
@@ -50,13 +61,19 @@ export function getNotificationStatusIcon(
   }
 
   // Priority 2: New failed sessions (notification style)
-  const newFailedSessions = getNewFailedSessions(sessions, lastSeenFailedSessions);
+  const newFailedSessions = getNewFailedSessions(
+    sessions,
+    lastSeenFailedSessions,
+  );
   if (newFailedSessions.length > 0) {
     return "icon-error.svg";
   }
 
   // Priority 3: New completed sessions (notification style)
-  const newCompletedSessions = getNewCompletedSessions(sessions, lastSeenCompletedSessions);
+  const newCompletedSessions = getNewCompletedSessions(
+    sessions,
+    lastSeenCompletedSessions,
+  );
   if (newCompletedSessions.length > 0) {
     return "icon-finished.svg";
   }
@@ -64,7 +81,9 @@ export function getNotificationStatusIcon(
   // Priority 4: Any running session (always show)
   if (
     sessions.find(
-      (session) => session.state === SessionState.IN_PROGRESS || session.state === SessionState.PLANNING, // Queued is arguably running too
+      (session) =>
+        session.state === SessionState.IN_PROGRESS ||
+        session.state === SessionState.PLANNING, // Queued is arguably running too
     )
   ) {
     return "icon-running.svg";
@@ -79,11 +98,11 @@ export function getNotificationStatusIcon(
  * Automatically marks completed and failed sessions as "seen" when the component mounts/updates
  */
 export function useSessionNotifications(sessions?: Session[]) {
-  const [lastSeenCompletedSessions, setLastSeenCompletedSessions] = useCachedState<string[]>(
-    "lastSeenCompletedSessions",
-    [],
-  );
-  const [lastSeenFailedSessions, setLastSeenFailedSessions] = useCachedState<string[]>("lastSeenFailedSessions", []);
+  const [lastSeenCompletedSessions, setLastSeenCompletedSessions] =
+    useCachedState<string[]>("lastSeenCompletedSessions", []);
+  const [lastSeenFailedSessions, setLastSeenFailedSessions] = useCachedState<
+    string[]
+  >("lastSeenFailedSessions", []);
 
   const runningSessions =
     sessions?.filter(
@@ -94,8 +113,12 @@ export function useSessionNotifications(sessions?: Session[]) {
     ) || [];
 
   const attentionSessions = sessions ? getAttentionSessions(sessions) : [];
-  const newCompletedSessions = sessions ? getNewCompletedSessions(sessions, lastSeenCompletedSessions) : [];
-  const newFailedSessions = sessions ? getNewFailedSessions(sessions, lastSeenFailedSessions) : [];
+  const newCompletedSessions = sessions
+    ? getNewCompletedSessions(sessions, lastSeenCompletedSessions)
+    : [];
+  const newFailedSessions = sessions
+    ? getNewFailedSessions(sessions, lastSeenFailedSessions)
+    : [];
 
   // Auto-acknowledge: Mark completed and failed sessions as seen when menu bar is viewed
   useEffect(() => {
@@ -137,7 +160,11 @@ export function useSessionNotifications(sessions?: Session[]) {
             : undefined;
 
   // Get the appropriate status icon
-  const statusIcon = getNotificationStatusIcon(sessions, lastSeenCompletedSessions, lastSeenFailedSessions);
+  const statusIcon = getNotificationStatusIcon(
+    sessions,
+    lastSeenCompletedSessions,
+    lastSeenFailedSessions,
+  );
 
   return {
     runningSessions,

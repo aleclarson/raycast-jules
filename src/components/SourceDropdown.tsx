@@ -7,7 +7,10 @@ interface SourceDropdownProps {
   value?: string;
 }
 
-export function SourceDropdown({ onSelectionChange, value }: SourceDropdownProps) {
+export function SourceDropdown({
+  onSelectionChange,
+  value,
+}: SourceDropdownProps) {
   const { data: sources, isLoading } = useSources();
 
   // Helper to get a display name for a source
@@ -39,7 +42,10 @@ export function SourceDropdown({ onSelectionChange, value }: SourceDropdownProps
           />
         ))
       ) : (
-        <Form.Dropdown.Item value="" title={isLoading ? "Loading..." : "No sources found"} />
+        <Form.Dropdown.Item
+          value=""
+          title={isLoading ? "Loading..." : "No sources found"}
+        />
       )}
     </Form.Dropdown>
   );

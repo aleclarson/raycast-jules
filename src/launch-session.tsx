@@ -10,7 +10,12 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
+import {
+  FormValidation,
+  showFailureToast,
+  useCachedState,
+  useForm,
+} from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
@@ -30,16 +35,26 @@ interface LaunchContext {
   source?: string;
 }
 
-export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
+export default function Command(
+  props: LaunchProps<{ launchContext?: LaunchContext }>,
+) {
   const preferences = getPreferenceValues<Preferences>();
   const { data: sources, isLoading: isLoadingSources } = useSources();
-  const [lastUsedSource, setLastUsedSource] = useCachedState<string>("lastUsedSource", NO_REPO);
-  const [lastUsedBranch, setLastUsedBranch] = useCachedState<string>("lastUsedBranch", "");
+  const [lastUsedSource, setLastUsedSource] = useCachedState<string>(
+    "lastUsedSource",
+    NO_REPO,
+  );
+  const [lastUsedBranch, setLastUsedBranch] = useCachedState<string>(
+    "lastUsedBranch",
+    "",
+  );
 
   const initialSource = props.launchContext?.source || lastUsedSource;
   const initialBranch = lastUsedBranch;
 
-  const [selectedSource, setSelectedSource] = useState<Source | undefined>(undefined);
+  const [selectedSource, setSelectedSource] = useState<Source | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (sources && initialSource) {
@@ -62,7 +77,10 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       startingBranch: initialBranch,
     },
     onSubmit: async (values) => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Launching Jules Session" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Launching Jules Session",
+      });
 
       try {
         let startingBranch = values.startingBranch;
@@ -70,10 +88,13 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
 
         if (values.sourceId !== NO_REPO) {
           if (!startingBranch) {
-            const selectedSource = sources?.find((s) => s.name === values.sourceId);
+            const selectedSource = sources?.find(
+              (s) => s.name === values.sourceId,
+            );
             // ... logic to find default branch
             if (selectedSource?.githubRepo?.defaultBranch?.displayName) {
-              startingBranch = selectedSource.githubRepo.defaultBranch.displayName;
+              startingBranch =
+                selectedSource.githubRepo.defaultBranch.displayName;
             } else {
               startingBranch = "main";
             }
@@ -126,7 +147,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Submit Task" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Submit Task"
+            icon={Icon.CheckCircle}
+            onSubmit={handleSubmit}
+          />
           <Action
             title="Improve Prompt"
             icon={Icon.Wand}
@@ -159,7 +184,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
       }
       isLoading={isLoadingSources}
     >
-      <Form.TextArea title="Prompt" placeholder="What should Jules do?" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder="What should Jules do?"
+        {...itemProps.prompt}
+      />
 
       <Form.Separator />
 
@@ -172,17 +201,25 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
             // Clear or handle no repo specific logic if needed
             setValue("startingBranch", "");
           } else if (source?.githubRepo?.defaultBranch?.displayName) {
-            setValue("startingBranch", source.githubRepo.defaultBranch.displayName);
+            setValue(
+              "startingBranch",
+              source.githubRepo.defaultBranch.displayName,
+            );
           }
         }}
         value={itemProps.sourceId.value}
       />
 
-      {selectedSource && <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />}
+      {selectedSource && (
+        <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />
+      )}
 
       <Form.Separator />
 
-      <Form.Description title="Options" text="Configure how Jules should work" />
+      <Form.Description
+        title="Options"
+        text="Configure how Jules should work"
+      />
 
       <Form.Checkbox
         label="Require plan approval"

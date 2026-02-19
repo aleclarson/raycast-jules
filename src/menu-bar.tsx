@@ -31,7 +31,10 @@ function SessionMenuBarItemWithPlanSteps({ session }: { session: Session }) {
 
   useEffect(() => {
     async function getPlanSteps() {
-      if (session.state === SessionState.PLANNING || session.state === SessionState.AWAITING_PLAN_APPROVAL) {
+      if (
+        session.state === SessionState.PLANNING ||
+        session.state === SessionState.AWAITING_PLAN_APPROVAL
+      ) {
         try {
           const activities = await fetchSessionActivities(session.name);
           const lastActivity = getLastActivity(activities);
@@ -51,7 +54,13 @@ function SessionMenuBarItemWithPlanSteps({ session }: { session: Session }) {
   return <SessionMenuBarItem session={session} planSteps={planSteps} />;
 }
 
-function SessionMenuBarItem({ session, planSteps }: { session: Session; planSteps?: number }) {
+function SessionMenuBarItem({
+  session,
+  planSteps,
+}: {
+  session: Session;
+  planSteps?: number;
+}) {
   const title = formatSessionTitle(session, 50);
 
   const prUrl = session.outputs?.find((o) => o.pullRequest)?.pullRequest?.url;
@@ -73,9 +82,15 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
             icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
             onAction={async () => {
               try {
-                await showToast({ style: Toast.Style.Animated, title: "Approving plan" });
+                await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Approving plan",
+                });
                 await approvePlan(session.name);
-                await showToast({ style: Toast.Style.Success, title: "Plan approved" });
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Plan approved",
+                });
               } catch (e) {
                 await showFailureToast(e, { title: "Failed to approve plan" });
               }
@@ -85,7 +100,9 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
         <MenuBarExtra.Item
           title="Open Session"
           icon={Icon.Globe}
-          tooltip={session.prompt + (planSteps ? `\n\nPlan steps: ${planSteps}` : "")}
+          tooltip={
+            session.prompt + (planSteps ? `\n\nPlan steps: ${planSteps}` : "")
+          }
           onAction={async (event) => {
             switch (event.type) {
               case "left-click":
@@ -100,7 +117,10 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
         />
         {prUrl && (
           <MenuBarExtra.Item
-            icon={{ source: "git-pull-request-arrow.svg", tintColor: Color.PrimaryText }}
+            icon={{
+              source: "git-pull-request-arrow.svg",
+              tintColor: Color.PrimaryText,
+            }}
             title={formatPrTitle(prUrl)}
             subtitle={formatPrSubtitle(prUrl)}
             onAction={async (event) => {
@@ -123,9 +143,15 @@ function SessionMenuBarItem({ session, planSteps }: { session: Session; planStep
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
           onAction={async () => {
             try {
-              await showToast({ style: Toast.Style.Animated, title: "Approving plan" });
+              await showToast({
+                style: Toast.Style.Animated,
+                title: "Approving plan",
+              });
               await approvePlan(session.name);
-              await showToast({ style: Toast.Style.Success, title: "Plan approved" });
+              await showToast({
+                style: Toast.Style.Success,
+                title: "Plan approved",
+              });
             } catch (e) {
               await showFailureToast(e, { title: "Failed to approve plan" });
             }
@@ -147,7 +173,10 @@ export default function MenuBar() {
       {today.length > 0 && (
         <MenuBarExtra.Section title="Today">
           {today.map((session) => (
-            <SessionMenuBarItemWithPlanSteps key={session.id} session={session} />
+            <SessionMenuBarItemWithPlanSteps
+              key={session.id}
+              session={session}
+            />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -155,7 +184,10 @@ export default function MenuBar() {
       {yesterday.length > 0 && (
         <MenuBarExtra.Section title="Yesterday">
           {yesterday.map((session) => (
-            <SessionMenuBarItemWithPlanSteps key={session.id} session={session} />
+            <SessionMenuBarItemWithPlanSteps
+              key={session.id}
+              session={session}
+            />
           ))}
         </MenuBarExtra.Section>
       )}
@@ -163,16 +195,22 @@ export default function MenuBar() {
       {thisWeek.length > 0 && (
         <MenuBarExtra.Section title="This Week">
           {thisWeek.map((session) => (
-            <SessionMenuBarItemWithPlanSteps key={session.id} session={session} />
+            <SessionMenuBarItemWithPlanSteps
+              key={session.id}
+              session={session}
+            />
           ))}
         </MenuBarExtra.Section>
       )}
 
-      {today.length === 0 && yesterday.length === 0 && thisWeek.length === 0 && !isLoading && (
-        <MenuBarExtra.Section>
-          <MenuBarExtra.Item title="No recent sessions" />
-        </MenuBarExtra.Section>
-      )}
+      {today.length === 0 &&
+        yesterday.length === 0 &&
+        thisWeek.length === 0 &&
+        !isLoading && (
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title="No recent sessions" />
+          </MenuBarExtra.Section>
+        )}
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
@@ -180,9 +218,14 @@ export default function MenuBar() {
           title="View All Sessions"
           onAction={async () => {
             try {
-              await launchCommand({ name: "list-sessions", type: LaunchType.UserInitiated });
+              await launchCommand({
+                name: "list-sessions",
+                type: LaunchType.UserInitiated,
+              });
             } catch (e) {
-              showFailureToast(e, { title: "Failed to launch list sessions command" });
+              showFailureToast(e, {
+                title: "Failed to launch list sessions command",
+              });
             }
           }}
         />
@@ -191,7 +234,11 @@ export default function MenuBar() {
           title="Open Dashboard"
           onAction={() => open("https://jules.google.com/sessions")}
         />
-        <MenuBarExtra.Item icon={Icon.Gear} title="Configure Command" onAction={openCommandPreferences} />
+        <MenuBarExtra.Item
+          icon={Icon.Gear}
+          title="Configure Command"
+          onAction={openCommandPreferences}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

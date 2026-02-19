@@ -5,7 +5,10 @@ export function getLastActivity(activities?: Activity[]): Activity | undefined {
   if (!activities || activities.length === 0) {
     return undefined;
   }
-  const sorted = [...activities].sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
+  const sorted = [...activities].sort(
+    (a, b) =>
+      new Date(b.createTime).getTime() - new Date(a.createTime).getTime(),
+  );
   return sorted[0];
 }
 

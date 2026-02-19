@@ -13,7 +13,12 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { FormValidation, showFailureToast, useCachedState, useForm } from "@raycast/utils";
+import {
+  FormValidation,
+  showFailureToast,
+  useCachedState,
+  useForm,
+} from "@raycast/utils";
 import { format } from "date-fns";
 import { useState } from "react";
 import {
@@ -79,7 +84,11 @@ function stripDiffHeader(patch: string): string {
   return formatted.join("\n").trim();
 }
 
-function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage?: string): FileChange[] {
+function parseUnidiffToFiles(
+  unidiffPatch: string,
+  source: string,
+  commitMessage?: string,
+): FileChange[] {
   const files: FileChange[] = [];
   const patches = unidiffPatch.split(/(?=^diff --git)/m).filter(Boolean);
 
@@ -88,7 +97,9 @@ function parseUnidiffToFiles(unidiffPatch: string, source: string, commitMessage
     if (match) {
       // Parse index line for commit range: "index abc123..def456"
       const indexMatch = patch.match(/^index ([a-f0-9]+)\.\.([a-f0-9]+)/m);
-      const gitDiffCommand = indexMatch ? `git diff ${indexMatch[1]}..${indexMatch[2]} -- ${match[2]}` : undefined;
+      const gitDiffCommand = indexMatch
+        ? `git diff ${indexMatch[1]}..${indexMatch[2]} -- ${match[2]}`
+        : undefined;
 
       const displayPatch = stripDiffHeader(patch);
 
@@ -126,11 +137,20 @@ function FileDetailView(props: { file: FileChange; session: Session }) {
       markdown={`# ${props.file.filename} [${lineCount} lines]\n\n\`\`\`diff\n${props.file.displayPatch}\n\`\`\``}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy File Diff" content={props.file.patch} />
+          <Action.CopyToClipboard
+            title="Copy File Diff"
+            content={props.file.patch}
+          />
           {props.file.gitDiffCommand && (
-            <Action.CopyToClipboard title="Copy Git Diff Command" content={props.file.gitDiffCommand} />
+            <Action.CopyToClipboard
+              title="Copy Git Diff Command"
+              content={props.file.gitDiffCommand}
+            />
           )}
-          <Action.OpenInBrowser url={props.session.url} title="Open Session in Browser" />
+          <Action.OpenInBrowser
+            url={props.session.url}
+            title="Open Session in Browser"
+          />
         </ActionPanel>
       }
     />
@@ -159,8 +179,13 @@ function MergePrAction(props: { prUrl: string }) {
 }
 
 function CodeReviewPage(props: { session: Session }) {
-  const { data: activities, isLoading, revalidate } = useSessionActivities(props.session.name);
-  const prUrl = props.session.outputs?.find((o) => o.pullRequest)?.pullRequest?.url;
+  const {
+    data: activities,
+    isLoading,
+    revalidate,
+  } = useSessionActivities(props.session.name);
+  const prUrl = props.session.outputs?.find((o) => o.pullRequest)?.pullRequest
+    ?.url;
 
   const lastActivity = useLastActivity(activities);
 
@@ -203,7 +228,12 @@ function CodeReviewPage(props: { session: Session }) {
   });
 
   if (isLoading) {
-    return <Detail isLoading navigationTitle={`Code Review: ${props.session.title || props.session.id}`} />;
+    return (
+      <Detail
+        isLoading
+        navigationTitle={`Code Review: ${props.session.title || props.session.id}`}
+      />
+    );
   }
 
   if (allChanges.length === 0) {
@@ -219,10 +249,17 @@ This session has no code changes to review.`}
               title="Send Message"
               icon={Icon.Message}
               target={
-                <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
+                <QuickMessageForm
+                  session={props.session}
+                  lastActivity={lastActivity}
+                  onMessageSent={revalidate}
+                />
               }
             />
-            <Action.OpenInBrowser url={props.session.url} title="Open Session in Browser" />
+            <Action.OpenInBrowser
+              url={props.session.url}
+              title="Open Session in Browser"
+            />
           </ActionPanel>
         }
       />
@@ -240,13 +277,25 @@ This session has no code changes to review.`}
               title="Send Message"
               icon={Icon.Message}
               target={
-                <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={revalidate} />
+                <QuickMessageForm
+                  session={props.session}
+                  lastActivity={lastActivity}
+                  onMessageSent={revalidate}
+                />
               }
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy All Changes" content={fullDiff} />
-            {commitMessage && <Action.CopyToClipboard title="Copy Commit Message" content={commitMessage} />}
+            <Action.CopyToClipboard
+              title="Copy All Changes"
+              content={fullDiff}
+            />
+            {commitMessage && (
+              <Action.CopyToClipboard
+                title="Copy Commit Message"
+                content={commitMessage}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title={`Files (${allChanges.length})`}>
             {allChanges.map((file, index) => (
@@ -263,14 +312,20 @@ This session has no code changes to review.`}
               <ApprovePrAction prUrl={prUrl} />
               <MergePrAction prUrl={prUrl} />
               <Action.OpenInBrowser
-                icon={{ source: "git-pull-request-arrow.svg", tintColor: Color.PrimaryText }}
+                icon={{
+                  source: "git-pull-request-arrow.svg",
+                  tintColor: Color.PrimaryText,
+                }}
                 url={prUrl}
                 title="Open Pull Request"
               />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={props.session.url} title="Open Session in Browser" />
+            <Action.OpenInBrowser
+              url={props.session.url}
+              title="Open Session in Browser"
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -278,24 +333,42 @@ This session has no code changes to review.`}
   );
 }
 
-function FollowupInstruction(props: { session: Session; onMessageSent?: () => void }) {
+function FollowupInstruction(props: {
+  session: Session;
+  onMessageSent?: () => void;
+}) {
   const { data: activities } = useSessionActivities(props.session.name);
 
   const lastActivity = useLastActivity(activities);
 
-  return <QuickMessageForm session={props.session} lastActivity={lastActivity} onMessageSent={props.onMessageSent} />;
+  return (
+    <QuickMessageForm
+      session={props.session}
+      lastActivity={lastActivity}
+      onMessageSent={props.onMessageSent}
+    />
+  );
 }
 
-function ApprovePlanAction(props: { session: Session; onApproved?: () => void }) {
+function ApprovePlanAction(props: {
+  session: Session;
+  onApproved?: () => void;
+}) {
   return (
     <Action
       title="Approve Plan"
       icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
       onAction={async () => {
         try {
-          await showToast({ style: Toast.Style.Animated, title: "Approving plan" });
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Approving plan",
+          });
           await approvePlan(props.session.name);
-          await showToast({ style: Toast.Style.Success, title: "Plan approved" });
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Plan approved",
+          });
           if (props.onApproved) {
             props.onApproved();
           }
@@ -307,7 +380,10 @@ function ApprovePlanAction(props: { session: Session; onApproved?: () => void })
   );
 }
 
-function DeclinePlanAction(props: { session: Session; mutate: () => Promise<void> }) {
+function DeclinePlanAction(props: {
+  session: Session;
+  mutate: () => Promise<void>;
+}) {
   return (
     <Action.Push
       title="Decline Plan"
@@ -317,13 +393,22 @@ function DeclinePlanAction(props: { session: Session; mutate: () => Promise<void
   );
 }
 
-function DeclinePlanForm(props: { session: Session; mutate: () => Promise<void> }) {
+function DeclinePlanForm(props: {
+  session: Session;
+  mutate: () => Promise<void>;
+}) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<{ reason: string }>({
     onSubmit: async (values) => {
       try {
-        await showToast({ style: Toast.Style.Animated, title: "Declining plan" });
-        await sendMessage(props.session.name, `I decline the plan. Reason: ${values.reason.trim()}`);
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Declining plan",
+        });
+        await sendMessage(
+          props.session.name,
+          `I decline the plan. Reason: ${values.reason.trim()}`,
+        );
         await showToast({ style: Toast.Style.Success, title: "Plan declined" });
         await props.mutate();
         pop();
@@ -340,16 +425,27 @@ function DeclinePlanForm(props: { session: Session; mutate: () => Promise<void> 
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Decline Plan" style={Action.Style.Destructive} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Decline Plan"
+            style={Action.Style.Destructive}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextArea title="Reason" placeholder="Why are you declining this plan?" {...itemProps.reason} />
+      <Form.TextArea
+        title="Reason"
+        placeholder="Why are you declining this plan?"
+        {...itemProps.reason}
+      />
     </Form>
   );
 }
 
-function SessionConversation(props: { session: Session; mutate: () => Promise<void> }) {
+function SessionConversation(props: {
+  session: Session;
+  mutate: () => Promise<void>;
+}) {
   const { data, isLoading } = useSessionActivities(props.session.name);
   const { defaultActivityFilter } = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState(defaultActivityFilter);
@@ -367,7 +463,8 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
     return true;
   });
 
-  const fullActivityLog = data?.map((a) => getActivityMarkdown(a)).join("\n\n---\n\n") || "";
+  const fullActivityLog =
+    data?.map((a) => getActivityMarkdown(a)).join("\n\n---\n\n") || "";
 
   return (
     <List
@@ -383,18 +480,27 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
         <List.Dropdown
           tooltip="Filter Activities"
           value={filter}
-          onChange={(newValue) => setFilter(newValue as Preferences["defaultActivityFilter"])}
+          onChange={(newValue) =>
+            setFilter(newValue as Preferences["defaultActivityFilter"])
+          }
         >
           <List.Dropdown.Item title="All Activities" value="all" />
           <List.Dropdown.Section>
             <List.Dropdown.Item title="Conversation Only" value="messages" />
-            <List.Dropdown.Item title="Results & Files Only" value="artifacts" />
+            <List.Dropdown.Item
+              title="Results & Files Only"
+              value="artifacts"
+            />
             <List.Dropdown.Item title="Milestones Only" value="hide-progress" />
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
-      <List.EmptyView title="No Activity Yet" description="This session hasn't started yet" icon={Icon.SpeechBubble} />
+      <List.EmptyView
+        title="No Activity Yet"
+        description="This session hasn't started yet"
+        icon={Icon.SpeechBubble}
+      />
       {filteredData?.map((activity) => (
         <List.Item
           key={activity.id}
@@ -402,7 +508,9 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
           subtitle={format(new Date(activity.createTime), "HH:mm")}
           detail={<List.Item.Detail markdown={getActivityMarkdown(activity)} />}
           actions={(() => {
-            const messageContent = activity.userMessaged?.userMessage || activity.agentMessaged?.agentMessage;
+            const messageContent =
+              activity.userMessaged?.userMessage ||
+              activity.agentMessaged?.agentMessage;
             if (!activity.planGenerated && !messageContent) return undefined;
 
             return (
@@ -420,7 +528,9 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
                         />
                       }
                     />
-                    <CopyPlanMarkdownAction plan={activity.planGenerated.plan} />
+                    <CopyPlanMarkdownAction
+                      plan={activity.planGenerated.plan}
+                    />
                   </ActionPanel.Section>
                 )}
                 {messageContent && (
@@ -437,13 +547,21 @@ function SessionConversation(props: { session: Session; mutate: () => Promise<vo
   );
 }
 
-function PlanDetailView(props: { plan: Plan; session: Session; mutate: () => Promise<void> }) {
+function PlanDetailView(props: {
+  plan: Plan;
+  session: Session;
+  mutate: () => Promise<void>;
+}) {
   const { plan, session, mutate } = props;
   const { pop } = useNavigation();
 
   return (
     <List navigationTitle={`Plan (${plan.steps.length} steps)`} isShowingDetail>
-      <List.EmptyView title="No Steps" description="This plan has no steps" icon={Icon.Document} />
+      <List.EmptyView
+        title="No Steps"
+        description="This plan has no steps"
+        icon={Icon.Document}
+      />
       {plan.steps.map((step) => (
         <List.Item
           key={step.id}
@@ -500,11 +618,28 @@ function SessionDetail(props: { session: Session }) {
       markdown={`## Prompt\n\n${session.prompt || "_No prompt_"}`}
       metadata={
         <List.Item.Detail.Metadata>
-          {session.title && <List.Item.Detail.Metadata.Label title="Title" text={session.title} />}
-          <List.Item.Detail.Metadata.Label title="State" text={formatSessionState(session.state)} />
+          {session.title && (
+            <List.Item.Detail.Metadata.Label
+              title="Title"
+              text={session.title}
+            />
+          )}
+          <List.Item.Detail.Metadata.Label
+            title="State"
+            text={formatSessionState(session.state)}
+          />
           <List.Item.Detail.Metadata.Separator />
-          {prUrl && <List.Item.Detail.Metadata.Link title="Pull Request" text={prUrl} target={prUrl} />}
-          <List.Item.Detail.Metadata.Label title="Repository" text={formatRepoName(session.sourceContext?.source)} />
+          {prUrl && (
+            <List.Item.Detail.Metadata.Link
+              title="Pull Request"
+              text={prUrl}
+              target={prUrl}
+            />
+          )}
+          <List.Item.Detail.Metadata.Label
+            title="Repository"
+            text={formatRepoName(session.sourceContext?.source)}
+          />
         </List.Item.Detail.Metadata>
       }
     />
@@ -518,7 +653,8 @@ function SessionListItem(props: {
   setIsShowingDetail: (value: boolean) => void;
 }) {
   const { push } = useNavigation();
-  const prUrl = props.session.outputs?.find((o) => o.pullRequest)?.pullRequest?.url;
+  const prUrl = props.session.outputs?.find((o) => o.pullRequest)?.pullRequest
+    ?.url;
 
   const title = formatSessionTitle(props.session, 75);
 
@@ -527,7 +663,11 @@ function SessionListItem(props: {
       id={props.session.id}
       key={props.session.id}
       title={title}
-      subtitle={props.isShowingDetail ? undefined : formatRepoName(props.session.sourceContext?.source)}
+      subtitle={
+        props.isShowingDetail
+          ? undefined
+          : formatRepoName(props.session.sourceContext?.source)
+      }
       icon={getStatusIconForSession(props.session)}
       accessories={getSessionAccessories(props.session, {
         hideCreateTime: props.isShowingDetail,
@@ -547,7 +687,12 @@ function SessionListItem(props: {
             <Action.Push
               icon={Icon.Message}
               title="Send Message"
-              target={<FollowupInstruction session={props.session} onMessageSent={props.mutate} />}
+              target={
+                <FollowupInstruction
+                  session={props.session}
+                  onMessageSent={props.mutate}
+                />
+              }
               shortcut={
                 {
                   macOS: { modifiers: ["cmd", "shift"], key: "n" },
@@ -564,10 +709,17 @@ function SessionListItem(props: {
                 shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 onAction={async () => {
                   try {
-                    await showToast({ style: Toast.Style.Animated, title: "Fetching plan" });
-                    const activities = await fetchSessionActivities(props.session.name);
+                    await showToast({
+                      style: Toast.Style.Animated,
+                      title: "Fetching plan",
+                    });
+                    const activities = await fetchSessionActivities(
+                      props.session.name,
+                    );
                     // Find the latest PlanGenerated activity
-                    const planActivity = [...activities].reverse().find((a) => a.planGenerated);
+                    const planActivity = [...activities]
+                      .reverse()
+                      .find((a) => a.planGenerated);
                     if (planActivity?.planGenerated) {
                       push(
                         <PlanDetailView
@@ -577,22 +729,37 @@ function SessionListItem(props: {
                         />,
                       );
                     } else {
-                      await showToast({ style: Toast.Style.Failure, title: "No plan found" });
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "No plan found",
+                      });
                     }
                   } catch (e) {
                     await showFailureToast(e, { title: "Failed to load plan" });
                   }
                 }}
               />
-              <ApprovePlanAction session={props.session} onApproved={props.mutate} />
-              <DeclinePlanAction session={props.session} mutate={props.mutate} />
+              <ApprovePlanAction
+                session={props.session}
+                onApproved={props.mutate}
+              />
+              <DeclinePlanAction
+                session={props.session}
+                mutate={props.mutate}
+              />
             </ActionPanel.Section>
           )}
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={props.session.url} title="Open in Browser" />
+            <Action.OpenInBrowser
+              url={props.session.url}
+              title="Open in Browser"
+            />
             {prUrl && (
               <Action.OpenInBrowser
-                icon={{ source: "git-pull-request-arrow.svg", tintColor: Color.PrimaryText }}
+                icon={{
+                  source: "git-pull-request-arrow.svg",
+                  tintColor: Color.PrimaryText,
+                }}
                 title="Open Pull Request"
                 url={prUrl}
                 shortcut={
@@ -619,7 +786,12 @@ function SessionListItem(props: {
             <Action.Push
               icon={Icon.List}
               title="View Activities"
-              target={<SessionConversation session={props.session} mutate={props.mutate} />}
+              target={
+                <SessionConversation
+                  session={props.session}
+                  mutate={props.mutate}
+                />
+              }
               shortcut={
                 {
                   macOS: { modifiers: ["cmd", "shift"], key: "v" },
@@ -643,12 +815,19 @@ function SessionListItem(props: {
               title="Summarize Session"
               icon={Icon.Wand}
               onAction={async () => {
-                const toast = await showToast({ style: Toast.Style.Animated, title: "Summarizing session" });
+                const toast = await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Summarizing session",
+                });
                 try {
-                  const activities = await fetchSessionActivities(props.session.name);
+                  const activities = await fetchSessionActivities(
+                    props.session.name,
+                  );
                   if (activities.length > 0) {
                     const content = activities
-                      .map((a) => getActivityMarkdown(a, { includeFullArtifacts: false }))
+                      .map((a) =>
+                        getActivityMarkdown(a, { includeFullArtifacts: false }),
+                      )
                       .join("\n\n---\n\n");
 
                     // Raycast AI has a character limit. If it's still too long, we truncate from the beginning
@@ -656,7 +835,8 @@ function SessionListItem(props: {
                     const MAX_CHARS = 25000;
                     const truncatedContent =
                       content.length > MAX_CHARS
-                        ? "... (older activities truncated)\n\n" + content.slice(-MAX_CHARS)
+                        ? "... (older activities truncated)\n\n" +
+                          content.slice(-MAX_CHARS)
                         : content;
 
                     const summary = await AI.ask(
@@ -680,7 +860,9 @@ function SessionListItem(props: {
                     toast.title = "No activity to summarize";
                   }
                 } catch (e) {
-                  await showFailureToast(e, { title: "Failed to summarize session" });
+                  await showFailureToast(e, {
+                    title: "Failed to summarize session",
+                  });
                 }
               }}
             />
@@ -700,19 +882,31 @@ function SessionListItem(props: {
 export default function Command() {
   const { data, isLoading, pagination, mutate } = useSessions();
   const { data: sources, isLoading: isLoadingSources } = useSources();
-  const [isShowingDetail, setIsShowingDetail] = useCachedState("isShowingDetail", false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState(
+    "isShowingDetail",
+    false,
+  );
   const [filterRepo, setFilterRepo] = useCachedState("filterRepo", "all");
 
   const repositories = Array.from(
-    new Set((sources || []).map((source) => formatRepoName(source.name)).filter(Boolean)),
+    new Set(
+      (sources || [])
+        .map((source) => formatRepoName(source.name))
+        .filter(Boolean),
+    ),
   ).sort();
 
   const filteredData = data?.filter((session) => {
-    if (filterRepo !== "all" && formatRepoName(session.sourceContext?.source) !== filterRepo) return false;
+    if (
+      filterRepo !== "all" &&
+      formatRepoName(session.sourceContext?.source) !== filterRepo
+    )
+      return false;
     return true;
   });
 
-  const { today, yesterday, thisWeek, thisMonth, older } = groupSessions(filteredData);
+  const { today, yesterday, thisWeek, thisMonth, older } =
+    groupSessions(filteredData);
 
   const dropdownValue = filterRepo !== "all" ? `repo:${filterRepo}` : "all:all";
 
@@ -737,7 +931,11 @@ export default function Command() {
           <List.Dropdown.Item title="All Sources" value="all:all" />
           <List.Dropdown.Section title="Repository">
             {repositories.map((repo) => (
-              <List.Dropdown.Item key={repo} title={repo} value={`repo:${repo}`} />
+              <List.Dropdown.Item
+                key={repo}
+                title={repo}
+                value={`repo:${repo}`}
+              />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>

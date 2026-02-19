@@ -13,7 +13,10 @@ interface BranchDropdownProps {
   };
 }
 
-export function BranchDropdown({ selectedSource, itemProps }: BranchDropdownProps) {
+export function BranchDropdown({
+  selectedSource,
+  itemProps,
+}: BranchDropdownProps) {
   const githubRepo = selectedSource?.githubRepo;
   const branches = githubRepo?.branches;
 
@@ -25,7 +28,11 @@ export function BranchDropdown({ selectedSource, itemProps }: BranchDropdownProp
         {...itemProps.startingBranch}
       >
         {branches.map((branch, index) => (
-          <Form.Dropdown.Item key={`${branch.name}-${index}`} value={branch.displayName} title={branch.displayName} />
+          <Form.Dropdown.Item
+            key={`${branch.name}-${index}`}
+            value={branch.displayName}
+            title={branch.displayName}
+          />
         ))}
       </Form.Dropdown>
     );

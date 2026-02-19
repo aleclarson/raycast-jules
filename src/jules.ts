@@ -1,7 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 import { URLSearchParams } from "url";
-import { ListActivitiesResponse, ListSessionsResponse, ListSourcesResponse, Session, Source } from "./types";
+import {
+  ListActivitiesResponse,
+  ListSessionsResponse,
+  ListSourcesResponse,
+  Session,
+  Source,
+} from "./types";
 
 interface ExtensionPreferences {
   julesApiKey: string;
@@ -56,7 +62,9 @@ export async function createSession(session: Partial<Session>) {
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Failed to create session: ${response.statusText} - ${errorBody}`);
+    throw new Error(
+      `Failed to create session: ${response.statusText} - ${errorBody}`,
+    );
   }
 
   return (await response.json()) as Session;
@@ -70,7 +78,10 @@ export function useSession(sessionId: string) {
 
 // --- Activities ---
 
-export function useSessionActivities(sessionId: string | undefined, config?: { pageSize?: number }) {
+export function useSessionActivities(
+  sessionId: string | undefined,
+  config?: { pageSize?: number },
+) {
   return useFetch(
     (options) => {
       const params = new URLSearchParams({
@@ -103,20 +114,28 @@ export async function fetchSessionActivities(sessionId: string | undefined) {
     return [];
   }
   const params = new URLSearchParams({ pageSize: "100" });
-  const response = await fetch(`${BASE_URL}/${sessionId}/activities?${params.toString()}`, {
-    headers: getHeaders(),
-  });
+  const response = await fetch(
+    `${BASE_URL}/${sessionId}/activities?${params.toString()}`,
+    {
+      headers: getHeaders(),
+    },
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Failed to fetch activities: ${response.statusText} - ${errorBody}`);
+    throw new Error(
+      `Failed to fetch activities: ${response.statusText} - ${errorBody}`,
+    );
   }
 
   const result = (await response.json()) as ListActivitiesResponse;
   return result.activities || [];
 }
 
-export async function sendMessage(sessionId: string | undefined, prompt: string) {
+export async function sendMessage(
+  sessionId: string | undefined,
+  prompt: string,
+) {
   if (!sessionId) {
     throw new Error("Cannot send message: session ID is missing");
   }
@@ -128,7 +147,9 @@ export async function sendMessage(sessionId: string | undefined, prompt: string)
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Failed to send message: ${response.statusText} - ${errorBody}`);
+    throw new Error(
+      `Failed to send message: ${response.statusText} - ${errorBody}`,
+    );
   }
 
   // Response is empty definition for sendMessage
@@ -145,7 +166,9 @@ export async function approvePlan(sessionId: string | undefined) {
 
   if (!response.ok) {
     const errorBody = await response.text();
-    throw new Error(`Failed to approve plan: ${response.statusText} - ${errorBody}`);
+    throw new Error(
+      `Failed to approve plan: ${response.statusText} - ${errorBody}`,
+    );
   }
 }
 
@@ -172,7 +195,9 @@ async function fetchAllSources() {
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Failed to fetch sources: ${response.statusText} - ${errorBody}`);
+      throw new Error(
+        `Failed to fetch sources: ${response.statusText} - ${errorBody}`,
+      );
     }
 
     const result = (await response.json()) as ListSourcesResponse;

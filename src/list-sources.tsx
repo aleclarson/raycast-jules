@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, launchCommand, LaunchType, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  List,
+} from "@raycast/api";
 import { CopyIdAction } from "./components/CopyActions";
 import { useSources } from "./jules";
 import { formatRepoName } from "./utils";
@@ -27,7 +36,10 @@ export default function Command() {
             accessories={[
               {
                 text: `${branchCount} ${branchCount === 1 ? "branch" : "branches"}`,
-                icon: { source: "git-branch.svg", tintColor: Color.SecondaryText },
+                icon: {
+                  source: "git-branch.svg",
+                  tintColor: Color.SecondaryText,
+                },
               },
               {
                 icon: repo.isPrivate ? Icon.Lock : Icon.Globe,

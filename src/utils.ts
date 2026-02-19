@@ -137,7 +137,11 @@ export function extractPR(prUrl: string) {
     const url = new URL(prUrl);
     const pathParts = url.pathname.split("/");
 
-    if (url.hostname === "github.com" && pathParts.length >= 5 && pathParts[3] === "pull") {
+    if (
+      url.hostname === "github.com" &&
+      pathParts.length >= 5 &&
+      pathParts[3] === "pull"
+    ) {
       const owner = pathParts[1];
       const name = pathParts[2];
       const number = pathParts[4];
@@ -203,7 +207,9 @@ export function formatSessionState(state: SessionState): string {
 
 export function formatSessionTitle(session: Session, maxLength = 50): string {
   const rawTitle = (session.title || session.id).split("\n")[0].trim();
-  return rawTitle.length > maxLength ? rawTitle.substring(0, maxLength) + "..." : rawTitle;
+  return rawTitle.length > maxLength
+    ? rawTitle.substring(0, maxLength) + "..."
+    : rawTitle;
 }
 
 export function getActivityTitle(activity: Activity): string {
@@ -211,9 +217,13 @@ export function getActivityTitle(activity: Activity): string {
   if (activity.agentMessaged) return "Agent Message";
   if (activity.planGenerated) return "Plan Generated";
   if (activity.planApproved) return "Plan Approved";
-  if (activity.progressUpdated) return activity.progressUpdated.title || "Progress Update";
+  if (activity.progressUpdated)
+    return activity.progressUpdated.title || "Progress Update";
   if (activity.sessionCompleted) return "Session Completed";
-  if (activity.sessionFailed) return "Session Failed: " + (activity.sessionFailed.reason || "Unknown reason");
+  if (activity.sessionFailed)
+    return (
+      "Session Failed: " + (activity.sessionFailed.reason || "Unknown reason")
+    );
   return activity.description || "Activity";
 }
 
@@ -223,7 +233,8 @@ export function getActivityMarkdown(
 ): string {
   let content = "";
   if (activity.userMessaged) content = activity.userMessaged.userMessage || "";
-  else if (activity.agentMessaged) content = activity.agentMessaged.agentMessage || "";
+  else if (activity.agentMessaged)
+    content = activity.agentMessaged.agentMessage || "";
   else if (activity.planGenerated) {
     const plan = activity.planGenerated.plan;
     content = `**Plan with ${plan.steps.length} steps:**\n\n`;
@@ -234,8 +245,10 @@ export function getActivityMarkdown(
     if (plan.steps.length > 4) {
       content += `\n_...and ${plan.steps.length - 4} more steps_`;
     }
-  } else if (activity.progressUpdated) content = activity.progressUpdated.description || "";
-  else if (activity.sessionFailed) content = activity.sessionFailed.reason || "";
+  } else if (activity.progressUpdated)
+    content = activity.progressUpdated.description || "";
+  else if (activity.sessionFailed)
+    content = activity.sessionFailed.reason || "";
   else content = activity.description || "";
 
   if (activity.artifacts && activity.artifacts.length > 0) {
@@ -245,7 +258,10 @@ export function getActivityMarkdown(
         content += `\n**Change Set**: ${artifact.changeSet.source}\n`;
         if (artifact.changeSet.gitPatch?.unidiffPatch) {
           if (options.includeFullArtifacts) {
-            content += "\n```diff\n" + artifact.changeSet.gitPatch.unidiffPatch + "\n```\n";
+            content +=
+              "\n```diff\n" +
+              artifact.changeSet.gitPatch.unidiffPatch +
+              "\n```\n";
           } else {
             content += "\n_Git patch omitted_\n";
           }
@@ -270,7 +286,11 @@ export function getActivityMarkdown(
 }
 
 export function formatPlanToMarkdown(plan: import("./types").Plan): string {
-  return plan.steps.map((s) => `${(s.index ?? 0) + 1}. **${s.title}**\n   ${s.description || ""}`).join("\n\n");
+  return plan.steps
+    .map(
+      (s) => `${(s.index ?? 0) + 1}. **${s.title}**\n   ${s.description || ""}`,
+    )
+    .join("\n\n");
 }
 
 export function formatBashOutputMarkdown(

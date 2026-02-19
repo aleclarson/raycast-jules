@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Detail, Grid, Icon, showInFinder, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Grid,
+  Icon,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { mkdir, writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -14,10 +23,17 @@ const mimeTypeToExtension: Record<string, string> = {
 };
 
 function getExtensionFromMimeType(mimeType: string): string {
-  return mimeTypeToExtension[mimeType] || mimeType.split("/")[1]?.split("+")[0] || "bin";
+  return (
+    mimeTypeToExtension[mimeType] ||
+    mimeType.split("/")[1]?.split("+")[0] ||
+    "bin"
+  );
 }
 
-async function saveMediaToDownloads(media: Media, session: Session): Promise<string> {
+async function saveMediaToDownloads(
+  media: Media,
+  session: Session,
+): Promise<string> {
   const downloadsPath = join(homedir(), "Downloads");
   await mkdir(downloadsPath, { recursive: true });
 
@@ -41,7 +57,10 @@ function SaveMediaAction(props: { media: Media; session: Session }) {
           title: "Saving media to downloads...",
         });
         try {
-          const savedPath = await saveMediaToDownloads(props.media, props.session);
+          const savedPath = await saveMediaToDownloads(
+            props.media,
+            props.session,
+          );
           toast.style = Toast.Style.Success;
           toast.title = "Media saved to downloads";
           toast.message = savedPath;
@@ -54,14 +73,19 @@ function SaveMediaAction(props: { media: Media; session: Session }) {
         } catch (error) {
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to save media";
-          toast.message = error instanceof Error ? error.message : String(error);
+          toast.message =
+            error instanceof Error ? error.message : String(error);
         }
       }}
     />
   );
 }
 
-function LargeMediaView(props: { media: Media; index: number; session: Session }) {
+function LargeMediaView(props: {
+  media: Media;
+  index: number;
+  session: Session;
+}) {
   const markdown = `![Artifact ${props.index + 1}](data:${props.media.mimeType};base64,${props.media.data})`;
   return (
     <Detail
@@ -77,7 +101,9 @@ function LargeMediaView(props: { media: Media; index: number; session: Session }
 }
 
 export default function ViewMedia(props: { session: Session }) {
-  const { data: activities, isLoading } = useSessionActivities(props.session.name);
+  const { data: activities, isLoading } = useSessionActivities(
+    props.session.name,
+  );
 
   const mediaArtifacts: Media[] =
     activities
@@ -88,7 +114,10 @@ export default function ViewMedia(props: { session: Session }) {
   return (
     <Grid isLoading={isLoading} navigationTitle="Media Artifacts">
       {mediaArtifacts.length === 0 && !isLoading ? (
-        <Grid.EmptyView title="No Media Found" description="This session has no media artifacts." />
+        <Grid.EmptyView
+          title="No Media Found"
+          description="This session has no media artifacts."
+        />
       ) : (
         mediaArtifacts.map((media, index) => (
           <Grid.Item
@@ -100,7 +129,13 @@ export default function ViewMedia(props: { session: Session }) {
                 <Action.Push
                   title="View Large"
                   icon={Icon.Maximize}
-                  target={<LargeMediaView media={media} index={index} session={props.session} />}
+                  target={
+                    <LargeMediaView
+                      media={media}
+                      index={index}
+                      session={props.session}
+                    />
+                  }
                 />
                 <SaveMediaAction media={media} session={props.session} />
               </ActionPanel>
