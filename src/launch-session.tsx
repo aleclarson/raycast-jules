@@ -99,7 +99,10 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
         setLastUsedSource(values.sourceId);
         setLastUsedBranch(values.startingBranch || "");
 
-        reset();
+        reset({
+          ...values,
+          prompt: "",
+        });
         focus("prompt");
 
         toast.style = Toast.Style.Success;
