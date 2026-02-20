@@ -48,6 +48,10 @@ export default function Command(
     "lastUsedBranch",
     "",
   );
+  const [draftPrompt, setDraftPrompt] = useCachedState<string>(
+    "draftPrompt",
+    "",
+  );
 
   const initialSource = props.launchContext?.source || lastUsedSource;
   const initialBranch = lastUsedBranch;
@@ -71,6 +75,7 @@ export default function Command(
       sourceId: FormValidation.Required,
     },
     initialValues: {
+      prompt: draftPrompt,
       sourceId: initialSource,
       requirePlanApproval: preferences.requirePlanApproval,
       autoCreatePR: preferences.autoCreatePR,
@@ -116,10 +121,6 @@ export default function Command(
 
         await refreshMenuBar();
 
-        // Save the source and branch for next time
-        setLastUsedSource(values.sourceId);
-        setLastUsedBranch(values.startingBranch || "");
-
         reset({
           ...values,
           prompt: "",
@@ -142,6 +143,16 @@ export default function Command(
       }
     },
   });
+
+  useEffect(() => {
+    setDraftPrompt(itemProps.prompt.value || "");
+    setLastUsedSource(itemProps.sourceId.value || NO_REPO);
+    setLastUsedBranch(itemProps.startingBranch.value || "");
+  }, [
+    itemProps.prompt.value,
+    itemProps.sourceId.value,
+    itemProps.startingBranch.value,
+  ]);
 
   return (
     <Form
