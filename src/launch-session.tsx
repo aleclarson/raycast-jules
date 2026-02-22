@@ -44,28 +44,25 @@ export default function Command(
     "lastUsedSource",
     NO_REPO,
   );
-  const [lastUsedBranch, setLastUsedBranch] = useCachedState<string>(
-    "lastUsedBranch",
-    "",
-  );
+  const [sourceBranches, setSourceBranches] = useCachedState<
+    Record<string, string>
+  >("sourceBranches", {});
   const [draftPrompt, setDraftPrompt] = useCachedState<string>(
     "draftPrompt",
     "",
   );
 
   const initialSource = props.launchContext?.source || lastUsedSource;
-  const initialBranch = lastUsedBranch;
+  const initialBranch = (initialSource && sourceBranches[initialSource]) || "";
 
   const [selectedSource, setSelectedSource] = useState<Source | undefined>(
     undefined,
   );
 
   useEffect(() => {
-    if (sources && initialSource) {
+    if (sources) {
       const source = sources.find((s) => s.name === initialSource);
-      if (source) {
-        setSelectedSource(source);
-      }
+      setSelectedSource(source);
     }
   }, [sources, initialSource]);
 
@@ -124,6 +121,8 @@ export default function Command(
         reset({
           ...values,
           prompt: "",
+          sourceId: NO_REPO,
+          startingBranch: "",
         });
         focus("prompt");
 
@@ -145,13 +144,48 @@ export default function Command(
   });
 
   useEffect(() => {
+    if (sources && initialSource) {
+      const source = sources.find((s) => s.name === initialSource);
+      if (source) {
+        if (!itemProps.startingBranch.value) {
+          const remembered = sourceBranches[initialSource];
+          if (remembered) {
+            setValue("startingBranch", remembered);
+          } else if (source.githubRepo?.defaultBranch?.displayName) {
+            setValue(
+              "startingBranch",
+              source.githubRepo.defaultBranch.displayName,
+            );
+          }
+        }
+      }
+    }
+  }, [
+    sources,
+    initialSource,
+    sourceBranches,
+    itemProps.startingBranch.value,
+    setValue,
+  ]);
+
+  useEffect(() => {
     setDraftPrompt(itemProps.prompt.value || "");
     setLastUsedSource(itemProps.sourceId.value || NO_REPO);
-    setLastUsedBranch(itemProps.startingBranch.value || "");
+
+    const currentSource = itemProps.sourceId.value;
+    const currentBranch = itemProps.startingBranch.value;
+
+    if (currentSource && currentSource !== NO_REPO && currentBranch) {
+      setSourceBranches((prev) => ({
+        ...prev,
+        [currentSource]: currentBranch,
+      }));
+    }
   }, [
     itemProps.prompt.value,
     itemProps.sourceId.value,
     itemProps.startingBranch.value,
+    setSourceBranches,
   ]);
 
   return (
@@ -211,11 +245,16 @@ export default function Command(
           if (value === NO_REPO) {
             // Clear or handle no repo specific logic if needed
             setValue("startingBranch", "");
-          } else if (source?.githubRepo?.defaultBranch?.displayName) {
-            setValue(
-              "startingBranch",
-              source.githubRepo.defaultBranch.displayName,
-            );
+          } else {
+            const rememberedBranch = sourceBranches[value];
+            if (rememberedBranch) {
+              setValue("startingBranch", rememberedBranch);
+            } else if (source?.githubRepo?.defaultBranch?.displayName) {
+              setValue(
+                "startingBranch",
+                source.githubRepo.defaultBranch.displayName,
+              );
+            }
           }
         }}
         value={itemProps.sourceId.value}
