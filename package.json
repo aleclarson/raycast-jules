@@ -35,6 +35,12 @@
       "disabledByDefault": true
     },
     {
+      "name": "configure-repo-access",
+      "title": "Configure Repo Access",
+      "description": "Configure which repositories Jules can access.",
+      "mode": "no-view"
+    },
+    {
       "name": "menu-bar",
       "title": "Menu Bar Overview",
       "description": "Check all your sessions from your menu bar.",
