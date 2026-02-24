@@ -69,7 +69,11 @@ export default function Command(
   const { reset, focus, handleSubmit, itemProps, setValue } = useForm<Values>({
     validation: {
       prompt: FormValidation.Required,
-      sourceId: FormValidation.Required,
+      sourceId: (value) => {
+        if (!value || value === NO_REPO) {
+          return "Please select a source repository";
+        }
+      },
     },
     initialValues: {
       prompt: draftPrompt,
