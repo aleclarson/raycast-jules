@@ -16,7 +16,7 @@ import {
   useCachedState,
   useForm,
 } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
 import { createSession, useSources } from "./jules";
@@ -35,15 +35,21 @@ interface LaunchContext {
   source?: string;
 }
 
+interface LastUsedSourceState {
+  sourceId: string;
+  timestamp: number;
+}
+
 export default function Command(
   props: LaunchProps<{ launchContext?: LaunchContext }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
   const { data: sources, isLoading: isLoadingSources } = useSources();
-  const [lastUsedSource, setLastUsedSource] = useCachedState<string>(
-    "lastUsedSource",
-    NO_REPO,
-  );
+  const [lastUsedSourceState, setLastUsedSourceState] =
+    useCachedState<LastUsedSourceState>("lastUsedSourceV2", {
+      sourceId: NO_REPO,
+      timestamp: 0,
+    });
   const [sourceBranches, setSourceBranches] = useCachedState<
     Record<string, string>
   >("sourceBranches", {});
@@ -51,6 +57,13 @@ export default function Command(
     "draftPrompt",
     "",
   );
+
+  const lastUsedSource = useMemo(() => {
+    if (Date.now() - lastUsedSourceState.timestamp < 15 * 60 * 1000) {
+      return lastUsedSourceState.sourceId;
+    }
+    return NO_REPO;
+  }, [lastUsedSourceState]);
 
   const initialSource = props.launchContext?.source || lastUsedSource;
   const initialBranch = (initialSource && sourceBranches[initialSource]) || "";
@@ -174,7 +187,10 @@ export default function Command(
 
   useEffect(() => {
     setDraftPrompt(itemProps.prompt.value || "");
-    setLastUsedSource(itemProps.sourceId.value || NO_REPO);
+    setLastUsedSourceState({
+      sourceId: itemProps.sourceId.value || NO_REPO,
+      timestamp: Date.now(),
+    });
 
     const currentSource = itemProps.sourceId.value;
     const currentBranch = itemProps.startingBranch.value;
