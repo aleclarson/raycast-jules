@@ -276,23 +276,17 @@ export default function Command(
       {selectedSource && (
         <BranchDropdown
           selectedSource={selectedSource}
-          itemProps={{
-            ...itemProps,
-            startingBranch: {
-              ...itemProps.startingBranch,
-              onChange: (newValue) => {
-                itemProps.startingBranch.onChange?.(newValue);
-                if (
-                  itemProps.sourceId.value &&
-                  itemProps.sourceId.value !== NO_REPO
-                ) {
-                  setSourceBranches((prev) => ({
-                    ...prev,
-                    [itemProps.sourceId.value!]: newValue || "",
-                  }));
-                }
-              },
-            },
+          itemProps={itemProps}
+          onBranchChange={(newValue) => {
+            if (
+              itemProps.sourceId.value &&
+              itemProps.sourceId.value !== NO_REPO
+            ) {
+              setSourceBranches((prev) => ({
+                ...prev,
+                [itemProps.sourceId.value!]: newValue || "",
+              }));
+            }
           }}
         />
       )}
