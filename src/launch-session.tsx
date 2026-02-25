@@ -135,6 +135,11 @@ export default function Command(
 
         await refreshMenuBar();
 
+        setDraftPrompt("");
+        setLastUsedSourceState({
+          sourceId: values.sourceId,
+          timestamp: Date.now(),
+        });
         reset({
           ...values,
           prompt: "",
@@ -184,29 +189,6 @@ export default function Command(
     setValue,
   ]);
 
-  useEffect(() => {
-    setDraftPrompt(itemProps.prompt.value || "");
-    setLastUsedSourceState({
-      sourceId: itemProps.sourceId.value || NO_REPO,
-      timestamp: Date.now(),
-    });
-
-    const currentSource = itemProps.sourceId.value;
-    const currentBranch = itemProps.startingBranch.value;
-
-    if (currentSource && currentSource !== NO_REPO && currentBranch) {
-      setSourceBranches((prev) => ({
-        ...prev,
-        [currentSource]: currentBranch,
-      }));
-    }
-  }, [
-    itemProps.prompt.value,
-    itemProps.sourceId.value,
-    itemProps.startingBranch.value,
-    setSourceBranches,
-  ]);
-
   return (
     <Form
       actions={
@@ -252,6 +234,14 @@ export default function Command(
         title="Prompt"
         placeholder="What should Jules do?"
         {...itemProps.prompt}
+        onChange={(newValue) => {
+          itemProps.prompt.onChange?.(newValue);
+          setDraftPrompt(newValue);
+          setLastUsedSourceState((prev) => ({
+            ...prev,
+            timestamp: Date.now(),
+          }));
+        }}
       />
 
       <Form.Separator />
@@ -259,6 +249,10 @@ export default function Command(
       <SourceDropdown
         onSelectionChange={(value) => {
           itemProps.sourceId.onChange?.(value);
+          setLastUsedSourceState({
+            sourceId: value || NO_REPO,
+            timestamp: Date.now(),
+          });
           const source = sources?.find((s) => s.name === value);
           setSelectedSource(source);
           if (value === NO_REPO) {
@@ -280,7 +274,27 @@ export default function Command(
       />
 
       {selectedSource && (
-        <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />
+        <BranchDropdown
+          selectedSource={selectedSource}
+          itemProps={{
+            ...itemProps,
+            startingBranch: {
+              ...itemProps.startingBranch,
+              onChange: (newValue) => {
+                itemProps.startingBranch.onChange?.(newValue);
+                if (
+                  itemProps.sourceId.value &&
+                  itemProps.sourceId.value !== NO_REPO
+                ) {
+                  setSourceBranches((prev) => ({
+                    ...prev,
+                    [itemProps.sourceId.value!]: newValue || "",
+                  }));
+                }
+              },
+            },
+          }}
+        />
       )}
 
       <Form.Separator />
