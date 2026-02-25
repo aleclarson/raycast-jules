@@ -138,8 +138,7 @@ export default function Command(
         reset({
           ...values,
           prompt: "",
-          sourceId: NO_REPO,
-          startingBranch: "",
+          sourceId: values.sourceId,
         });
         focus("prompt");
 
