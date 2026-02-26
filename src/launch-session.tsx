@@ -59,7 +59,8 @@ export default function Command(
   );
 
   const lastUsedSource = useMemo(() => {
-    if (Date.now() - lastUsedSourceState.timestamp < 15 * 60 * 1000) {
+    // Remember the source for 60 minutes
+    if (Date.now() - lastUsedSourceState.timestamp < 60 * 60 * 1000) {
       return lastUsedSourceState.sourceId;
     }
     return NO_REPO;
