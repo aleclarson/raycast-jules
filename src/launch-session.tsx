@@ -16,7 +16,7 @@ import {
   useCachedState,
   useForm,
 } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
 import { createSession, useSources } from "./jules";
@@ -35,15 +35,21 @@ interface LaunchContext {
   source?: string;
 }
 
+interface LastUsedSourceState {
+  sourceId: string;
+  timestamp: number;
+}
+
 export default function Command(
   props: LaunchProps<{ launchContext?: LaunchContext }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
   const { data: sources, isLoading: isLoadingSources } = useSources();
-  const [lastUsedSource, setLastUsedSource] = useCachedState<string>(
-    "lastUsedSource",
-    NO_REPO,
-  );
+  const [lastUsedSourceState, setLastUsedSourceState] =
+    useCachedState<LastUsedSourceState>("lastUsedSourceV2", {
+      sourceId: NO_REPO,
+      timestamp: 0,
+    });
   const [sourceBranches, setSourceBranches] = useCachedState<
     Record<string, string>
   >("sourceBranches", {});
@@ -51,6 +57,14 @@ export default function Command(
     "draftPrompt",
     "",
   );
+
+  const lastUsedSource = useMemo(() => {
+    // Remember the source for 60 minutes
+    if (Date.now() - lastUsedSourceState.timestamp < 60 * 60 * 1000) {
+      return lastUsedSourceState.sourceId;
+    }
+    return NO_REPO;
+  }, [lastUsedSourceState]);
 
   const initialSource = props.launchContext?.source || lastUsedSource;
   const initialBranch = (initialSource && sourceBranches[initialSource]) || "";
@@ -122,11 +136,15 @@ export default function Command(
 
         await refreshMenuBar();
 
+        setDraftPrompt("");
+        setLastUsedSourceState({
+          sourceId: values.sourceId,
+          timestamp: Date.now(),
+        });
         reset({
           ...values,
           prompt: "",
-          sourceId: NO_REPO,
-          startingBranch: "",
+          sourceId: values.sourceId,
         });
         focus("prompt");
 
@@ -170,26 +188,6 @@ export default function Command(
     sourceBranches,
     itemProps.startingBranch.value,
     setValue,
-  ]);
-
-  useEffect(() => {
-    setDraftPrompt(itemProps.prompt.value || "");
-    setLastUsedSource(itemProps.sourceId.value || NO_REPO);
-
-    const currentSource = itemProps.sourceId.value;
-    const currentBranch = itemProps.startingBranch.value;
-
-    if (currentSource && currentSource !== NO_REPO && currentBranch) {
-      setSourceBranches((prev) => ({
-        ...prev,
-        [currentSource]: currentBranch,
-      }));
-    }
-  }, [
-    itemProps.prompt.value,
-    itemProps.sourceId.value,
-    itemProps.startingBranch.value,
-    setSourceBranches,
   ]);
 
   return (
@@ -237,6 +235,14 @@ export default function Command(
         title="Prompt"
         placeholder="What should Jules do?"
         {...itemProps.prompt}
+        onChange={(newValue) => {
+          itemProps.prompt.onChange?.(newValue);
+          setDraftPrompt(newValue);
+          setLastUsedSourceState((prev) => ({
+            ...prev,
+            timestamp: Date.now(),
+          }));
+        }}
       />
 
       <Form.Separator />
@@ -244,6 +250,10 @@ export default function Command(
       <SourceDropdown
         onSelectionChange={(value) => {
           itemProps.sourceId.onChange?.(value);
+          setLastUsedSourceState({
+            sourceId: value || NO_REPO,
+            timestamp: Date.now(),
+          });
           const source = sources?.find((s) => s.name === value);
           setSelectedSource(source);
           if (value === NO_REPO) {
@@ -265,7 +275,21 @@ export default function Command(
       />
 
       {selectedSource && (
-        <BranchDropdown selectedSource={selectedSource} itemProps={itemProps} />
+        <BranchDropdown
+          selectedSource={selectedSource}
+          itemProps={itemProps}
+          onBranchChange={(newValue) => {
+            if (
+              itemProps.sourceId.value &&
+              itemProps.sourceId.value !== NO_REPO
+            ) {
+              setSourceBranches((prev) => ({
+                ...prev,
+                [itemProps.sourceId.value!]: newValue || "",
+              }));
+            }
+          }}
+        />
       )}
 
       <Form.Separator />

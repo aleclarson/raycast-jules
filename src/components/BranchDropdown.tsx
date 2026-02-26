@@ -11,11 +11,13 @@ interface BranchDropdownProps {
       id: string;
     };
   };
+  onBranchChange?: (newValue: string) => void;
 }
 
 export function BranchDropdown({
   selectedSource,
   itemProps,
+  onBranchChange,
 }: BranchDropdownProps) {
   const githubRepo = selectedSource?.githubRepo;
   const branches = githubRepo?.branches;
@@ -26,6 +28,10 @@ export function BranchDropdown({
         title="Starting Branch"
         info="The branch to base the feature branch on. If not provided, the default branch will be used."
         {...itemProps.startingBranch}
+        onChange={(newValue) => {
+          itemProps.startingBranch.onChange?.(newValue);
+          onBranchChange?.(newValue);
+        }}
       >
         {branches.map((branch, index) => (
           <Form.Dropdown.Item
@@ -44,6 +50,10 @@ export function BranchDropdown({
       placeholder="main"
       info="The branch to base the feature branch on. If not provided, the default branch will be used."
       {...itemProps.startingBranch}
+      onChange={(newValue) => {
+        itemProps.startingBranch.onChange?.(newValue);
+        onBranchChange?.(newValue);
+      }}
     />
   );
 }
