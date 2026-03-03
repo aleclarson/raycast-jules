@@ -19,6 +19,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
+import { useSourceUsage } from "./hooks";
 import { createSession, useSources } from "./jules";
 import { AutomationMode, NO_REPO, Source } from "./types";
 import { refreshMenuBar } from "./utils";
@@ -45,6 +46,7 @@ export default function Command(
 ) {
   const preferences = getPreferenceValues<Preferences>();
   const { data: sources, isLoading: isLoadingSources } = useSources();
+  const { incrementUsage } = useSourceUsage();
   const [lastUsedSourceState, setLastUsedSourceState] =
     useCachedState<LastUsedSourceState>("lastUsedSourceV2", {
       sourceId: NO_REPO,
@@ -141,6 +143,9 @@ export default function Command(
           sourceId: values.sourceId,
           timestamp: Date.now(),
         });
+        if (values.sourceId && values.sourceId !== NO_REPO) {
+          incrementUsage(values.sourceId);
+        }
         reset({
           ...values,
           prompt: "",

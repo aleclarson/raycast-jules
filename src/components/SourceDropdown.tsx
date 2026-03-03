@@ -1,4 +1,6 @@
 import { Form } from "@raycast/api";
+import { useMemo } from "react";
+import { useSourceUsage } from "../hooks";
 import { useSources } from "../jules";
 import { NO_REPO, Source } from "../types";
 
@@ -12,6 +14,14 @@ export function SourceDropdown({
   value,
 }: SourceDropdownProps) {
   const { data: sources, isLoading } = useSources();
+  const { usageCounts } = useSourceUsage();
+
+  const sortedSources = useMemo(() => {
+    if (!sources) return sources;
+    return [...sources].sort(
+      (a, b) => (usageCounts[b.name] || 0) - (usageCounts[a.name] || 0),
+    );
+  }, [sources, usageCounts]);
 
   // Helper to get a display name for a source
   const getSourceLabel = (source: Source) => {
@@ -32,8 +42,8 @@ export function SourceDropdown({
       onChange={onSelectionChange}
     >
       <Form.Dropdown.Item value={NO_REPO} title="No Repository" />
-      {sources && sources.length > 0 ? (
-        sources.map((source) => (
+      {sortedSources && sortedSources.length > 0 ? (
+        sortedSources.map((source) => (
           <Form.Dropdown.Item
             key={source.id}
             value={source.name} // Using resource name as the ID/value
