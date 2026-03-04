@@ -10,11 +10,13 @@ import {
 } from "@raycast/api";
 import { useMemo } from "react";
 import { CopyIdAction } from "./components/CopyActions";
-import { useSourceUsage } from "./hooks";
+import { useSourceUsage, useSourceUsageDecay } from "./hooks";
 import { useSources } from "./jules";
 import { formatRepoName } from "./utils";
 
 export default function Command() {
+  useSourceUsageDecay();
+
   const { data, isLoading, revalidate } = useSources();
   const { usageCounts } = useSourceUsage();
 

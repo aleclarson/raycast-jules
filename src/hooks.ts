@@ -17,10 +17,8 @@ export function useLastActivity(activities?: Activity[]): Activity | undefined {
   return useMemo(() => getLastActivity(activities), [activities]);
 }
 
-let hasDecayedThisSession = false;
-
-export function useSourceUsage() {
-  const [usageCounts, setUsageCounts] = useCachedState<Record<string, number>>(
+export function useSourceUsageDecay() {
+  const [, setUsageCounts] = useCachedState<Record<string, number>>(
     "sourceUsageCounts",
     {},
   );
@@ -37,8 +35,7 @@ export function useSourceUsage() {
     }
 
     const ONE_DAY = 24 * 60 * 60 * 1000;
-    if (Date.now() - lastDecayed > ONE_DAY && !hasDecayedThisSession) {
-      hasDecayedThisSession = true;
+    if (Date.now() - lastDecayed > ONE_DAY) {
       setUsageCounts((prev) => {
         const next = { ...prev };
         for (const key in next) {
@@ -49,6 +46,13 @@ export function useSourceUsage() {
       setLastDecayed(Date.now());
     }
   }, [lastDecayed, setLastDecayed, setUsageCounts]);
+}
+
+export function useSourceUsage() {
+  const [usageCounts, setUsageCounts] = useCachedState<Record<string, number>>(
+    "sourceUsageCounts",
+    {},
+  );
 
   const incrementUsage = (sourceId: string) => {
     setUsageCounts((prev) => ({

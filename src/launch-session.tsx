@@ -19,7 +19,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { BranchDropdown } from "./components/BranchDropdown";
 import { SourceDropdown } from "./components/SourceDropdown";
-import { useSourceUsage } from "./hooks";
+import { useSourceUsage, useSourceUsageDecay } from "./hooks";
 import { createSession, useSources } from "./jules";
 import { AutomationMode, NO_REPO, Source } from "./types";
 import { refreshMenuBar } from "./utils";
@@ -45,6 +45,8 @@ export default function Command(
   props: LaunchProps<{ launchContext?: LaunchContext }>,
 ) {
   const preferences = getPreferenceValues<Preferences>();
+  useSourceUsageDecay();
+
   const { data: sources, isLoading: isLoadingSources } = useSources();
   const { incrementUsage } = useSourceUsage();
   const [lastUsedSourceState, setLastUsedSourceState] =
