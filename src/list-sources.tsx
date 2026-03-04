@@ -8,17 +8,29 @@ import {
   LaunchType,
   List,
 } from "@raycast/api";
+import { useMemo } from "react";
 import { CopyIdAction } from "./components/CopyActions";
+import { useSourceUsage, useSourceUsageDecay } from "./hooks";
 import { useSources } from "./jules";
 import { formatRepoName } from "./utils";
 
 export default function Command() {
+  useSourceUsageDecay();
+
   const { data, isLoading, revalidate } = useSources();
+  const { usageCounts } = useSourceUsage();
+
+  const sortedData = useMemo(() => {
+    if (!data) return data;
+    return [...data].sort(
+      (a, b) => (usageCounts[b.name] || 0) - (usageCounts[a.name] || 0),
+    );
+  }, [data, usageCounts]);
 
   return (
     <List isLoading={isLoading}>
       <List.EmptyView title="No Sources Found" icon={Icon.MagnifyingGlass} />
-      {data?.map((source) => {
+      {sortedData?.map((source) => {
         const repo = source.githubRepo;
         if (!repo) return null;
 
